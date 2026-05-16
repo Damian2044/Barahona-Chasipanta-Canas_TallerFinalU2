@@ -1,2 +1,0 @@
-fase,descripcion,cantidadImagenes,cantidadClases,tamanoTotalGb,tiempoSegundos,archivoSalida
-dask,"Ingesta lazy con Dask Bag, validacion de rutas, metadatos y reduccion inicial",4000,4,5.113029403612018,1.3361105320000206,"/media/alumno/DAMIAN/Barahona,Chasipanta,Cañas_TallerFinal/salidas/tablaRutas.csv"
