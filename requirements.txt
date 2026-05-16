@@ -1,0 +1,10 @@
+kagglehub
+dask[dataframe]
+numpy
+pandas
+pillow
+opencv-python
+streamlit
+plotly
+tqdm
+nbformat
