@@ -1,29 +1,50 @@
-# Python bytecode and caches
+# Caches y bytecode de Python
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 
-# Virtual environments
+# Entornos virtuales
 venv/
 .venv/
 env/
 ENV/
 
-# Notebook metadata
+# Metadatos de notebooks
 .ipynb_checkpoints/
 
-# IDE settings
+# Ajustes del IDE
 .vscode/
 
-# Generated data and outputs
+# Datos e imagenes pesadas
 data/
+src/data/
 salidas/cudaBin/
 salidas/cudaNpy/
 salidas/cudaPng/
 salidas/npyCpu/
 salidas/rawCuda/
-salidas/paquetes/
+src/salidas/cudaBin/
+src/salidas/cudaNpy/
+src/salidas/cudaPng/
+src/salidas/npyCpu/
+src/salidas/rawCuda/
 
-# Optional local artifacts
+# Permitir subir metricas CSV. Los ZIP grandes no se suben a GitHub normal
+# porque GitHub bloquea archivos mayores a 100 MB.
+!src/metricas/
+src/metricas/*
+!src/metricas/*.csv
+!src/salidas/
+src/salidas/*
+!src/salidas/*.csv
+!src/salidas/paquetes/
+src/salidas/paquetes/*
+!salidas/
+salidas/*
+!salidas/*.csv
+!salidas/paquetes/
+salidas/paquetes/*
+
+# Artefactos locales opcionales
 *.log

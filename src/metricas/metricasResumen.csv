@@ -1,0 +1,4 @@
+fase,tiempoSegundos,cantidadRegistros,detalle
+Dask DataFrame,1.2256160999822896,4000,"Ingesta lazy, limpieza y groupby"
+Multiprocessing CPU + RAW,199.2215750000032,4000,"OpenCV, resize 512x512, metricas y RAW CUDA"
+CUDA GPU Repujado,10.632455409999999,4000,Convolucion 3x3 en GPU con memoria compartida

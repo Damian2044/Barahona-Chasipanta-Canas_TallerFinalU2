@@ -18,6 +18,17 @@ from proyecto.configuracion.configuracionProyecto import (
 )
 
 
+tiposColumnasDask = {
+    "rutaImagen": "string",
+    "nombreArchivo": "string",
+    "clase": "string",
+    "extension": "string",
+    "tamanoBytes": "int64",
+    "valida": "bool",
+    "error": "string",
+}
+
+
 def dividirLista(datos, tamanoChunk):
     """Divide una lista grande para que Dask construya particiones lazy."""
     for indice in range(0, len(datos), tamanoChunk):
@@ -49,7 +60,7 @@ def crearMetadatosParticion(rutasTexto):
                 "valida": False,
                 "error": str(error),
             })
-    return pd.DataFrame(registros)
+    return pd.DataFrame(registros).astype(tiposColumnasDask)
 
 
 def buscarRutasImagenes():
@@ -81,13 +92,8 @@ def ejecutarFaseDask():
         raise ValueError("No se encontraron imagenes en el dataset.")
 
     meta = pd.DataFrame({
-        "rutaImagen": pd.Series(dtype="string"),
-        "nombreArchivo": pd.Series(dtype="string"),
-        "clase": pd.Series(dtype="string"),
-        "extension": pd.Series(dtype="string"),
-        "tamanoBytes": pd.Series(dtype="int64"),
-        "valida": pd.Series(dtype="bool"),
-        "error": pd.Series(dtype="string"),
+        columna: pd.Series(dtype=tipo)
+        for columna, tipo in tiposColumnasDask.items()
     })
 
     particiones = [
@@ -96,15 +102,7 @@ def ejecutarFaseDask():
     ]
 
     tablaDask = dd.from_delayed(particiones, meta=meta)
-    tablaDask = tablaDask.astype({
-        "rutaImagen": "string",
-        "nombreArchivo": "string",
-        "clase": "string",
-        "extension": "string",
-        "tamanoBytes": "int64",
-        "valida": "bool",
-        "error": "string",
-    })
+    tablaDask = tablaDask.astype(tiposColumnasDask)
 
     # Limpieza lazy: se filtran archivos invalidos y extensiones no permitidas.
     tablaFiltrada = tablaDask[
@@ -150,9 +148,9 @@ def ejecutarFaseDask():
     metricasDask.to_csv(rutaMetricasDask, index=False)
 
     print("Fase Dask DataFrame completada.")
-    print(metricasDask)
+    print(metricasDask.to_string(index=False))
     print("\nResumen por clase:")
-    print(resumenClases)
+    print(resumenClases.to_string(index=False))
     return tablaRutas
 
 

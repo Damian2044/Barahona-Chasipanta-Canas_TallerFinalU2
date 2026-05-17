@@ -1,13 +1,16 @@
 import shutil
+import time
 import zipfile
 from pathlib import Path
+
+import pandas as pd
 
 from proyecto.configuracion.configuracionProyecto import (
     rutaBaseProyecto,
     rutaCudaBin,
-    rutaCudaNpy,
-    rutaCudaPng,
     rutaMetricas,
+    rutaMetricasExtraccionCuda,
+    rutaMetricasPaqueteCuda,
     rutaNpyCpu,
     rutaPaquetes,
     rutaRawCuda,
@@ -19,7 +22,7 @@ from proyecto.configuracion.configuracionProyecto import (
 
 def crearCarpetasProyecto():
     """Crea las carpetas base que usa el pipeline."""
-    for ruta in [rutaSalidas, rutaMetricas, rutaPaquetes, rutaNpyCpu, rutaRawCuda, rutaCudaBin, rutaCudaNpy, rutaCudaPng]:
+    for ruta in [rutaSalidas, rutaMetricas, rutaPaquetes, rutaNpyCpu, rutaRawCuda, rutaCudaBin]:
         ruta.mkdir(parents=True, exist_ok=True)
 
 
@@ -35,6 +38,7 @@ def limpiarResultados():
 
 def crearZipCudaEntrada():
     """Empaqueta RAW y metricas para subir directamente a Colab."""
+    inicio = time.perf_counter()
     if rutaZipCudaEntrada.exists():
         rutaZipCudaEntrada.unlink()
 
@@ -52,13 +56,32 @@ def crearZipCudaEntrada():
                     if archivo.is_file():
                         zipSalida.write(archivo, archivo.relative_to(rutaBaseProyecto))
 
+    tiempo = time.perf_counter() - inicio
+    pd.DataFrame([{
+        "fase": "paqueteCuda",
+        "descripcion": "Creacion del ZIP con RAW y metricas para Colab",
+        "rutaZip": str(rutaZipCudaEntrada),
+        "tamanoZipMb": rutaZipCudaEntrada.stat().st_size / (1024 ** 2) if rutaZipCudaEntrada.exists() else 0.0,
+        "tiempoSegundos": float(tiempo),
+    }]).to_csv(rutaMetricasPaqueteCuda, index=False)
+
     return rutaZipCudaEntrada
 
 
 def descomprimirZipResultados(rutaZip):
     """Extrae el zip de resultados CUDA dentro del proyecto."""
+    inicio = time.perf_counter()
     rutaZip = Path(rutaZip)
     if not rutaZip.exists():
         raise FileNotFoundError(f"No existe el zip de resultados CUDA: {rutaZip}")
     with zipfile.ZipFile(rutaZip, "r") as zipEntrada:
         zipEntrada.extractall(rutaBaseProyecto)
+
+    tiempo = time.perf_counter() - inicio
+    pd.DataFrame([{
+        "fase": "extraerResultadosCuda",
+        "descripcion": "Extraccion del ZIP descargado desde Colab",
+        "rutaZip": str(rutaZip),
+        "tiempoSegundos": float(tiempo),
+    }]).to_csv(rutaMetricasExtraccionCuda, index=False)
+    return rutaBaseProyecto

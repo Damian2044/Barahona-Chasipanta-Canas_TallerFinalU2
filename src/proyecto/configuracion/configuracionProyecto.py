@@ -23,8 +23,6 @@ rutaTablaRutas = rutaSalidas / "tablaRutas.csv"
 rutaNpyCpu = rutaSalidas / "npyCpu"
 rutaRawCuda = rutaSalidas / "rawCuda"
 rutaCudaBin = rutaSalidas / "cudaBin"
-rutaCudaNpy = rutaSalidas / "cudaNpy"
-rutaCudaPng = rutaSalidas / "cudaPng"
 rutaPaquetes = rutaSalidas / "paquetes"
 
 ###### ZIPS PARA COLAB ######
@@ -39,6 +37,8 @@ rutaMetricasCpuClases = rutaMetricas / "metricasCpuClases.csv"
 rutaMetricasPrepararCuda = rutaMetricas / "metricasPrepararCuda.csv"
 rutaMetricasCudaColab = rutaMetricas / "metricasCudaColab.csv"
 rutaMetricasIntegracionCuda = rutaMetricas / "metricasIntegracionCuda.csv"
+rutaMetricasPaqueteCuda = rutaMetricas / "metricasPaqueteCuda.csv"
+rutaMetricasExtraccionCuda = rutaMetricas / "metricasExtraccionCuda.csv"
 rutaMetricasResumen = rutaMetricas / "metricasResumen.csv"
 
 ###### PARAMETROS DEL PROCESAMIENTO LOCAL ######

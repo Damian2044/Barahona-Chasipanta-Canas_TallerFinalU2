@@ -37,7 +37,7 @@ def main():
 
     tabla = pd.DataFrame(registros)
     print('\nResumen por clase:')
-    print(tabla)
+    print(tabla.to_string(index=False))
     print('\nTotal imagenes:', totalImagenes)
     print('Tamano total GB:', round(bytesAGb(totalBytes), 4))
 

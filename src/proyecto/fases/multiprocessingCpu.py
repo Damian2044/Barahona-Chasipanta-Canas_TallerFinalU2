@@ -37,11 +37,10 @@ def resolverProcesos(procesosSolicitados=None):
 
 
 def calcularTamanoChunk(cantidadRegistros, procesosUsados):
-    """Calcula chunks automaticamente segun imagenes y CPU disponibles."""
+    """Divide el trabajo en un chunk principal por proceso."""
     if cantidadRegistros <= 0:
         return 1
-    cantidadChunksDeseada = max(procesosUsados * 4, 1)
-    return max(1, ceil(cantidadRegistros / cantidadChunksDeseada))
+    return max(1, ceil(cantidadRegistros / max(procesosUsados, 1)))
 
 
 def procesarChunkCpu(argumentos):
@@ -131,7 +130,7 @@ def procesarImagenCpu(fila, indiceChunk=0):
         resultadoCuda = {
             "idImagen": idImagen,
             "clase": clase,
-            "rutaRaw": str(rutaSalidaRawRelativa),
+            "rutaRaw": rutaSalidaRawRelativa.as_posix(),
             "alto": tamanoObjetivo,
             "ancho": tamanoObjetivo,
             "tipoDato": "uint8",

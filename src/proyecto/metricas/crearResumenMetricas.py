@@ -5,8 +5,6 @@ from proyecto.configuracion.configuracionProyecto import (
     rutaMetricasCpu,
     rutaMetricasCudaColab,
     rutaMetricasDask,
-    rutaMetricasIntegracionCuda,
-    rutaMetricasPrepararCuda,
     rutaMetricasResumen,
 )
 
@@ -40,15 +38,6 @@ def crearMetricasResumen():
             "detalle": "OpenCV, resize 512x512, metricas y RAW CUDA",
         })
 
-    if rutaMetricasPrepararCuda.exists():
-        preparar = pd.read_csv(rutaMetricasPrepararCuda)
-        registros.append({
-            "fase": "Paquete CUDA",
-            "tiempoSegundos": tiempoUnicoSiExiste(preparar, "tiempoPreparacionGlobalSegundos", 0.0),
-            "cantidadRegistros": int(len(preparar)),
-            "detalle": "Archivos rawCuda listos para Colab",
-        })
-
     if rutaMetricasCudaColab.exists():
         cuda = pd.read_csv(rutaMetricasCudaColab)
         if "tiempoTotalGpuSegundos" in cuda.columns:
@@ -58,24 +47,15 @@ def crearMetricasResumen():
         else:
             tiempoCuda = 0.0
         registros.append({
-            "fase": "CUDA GPU Laplaciano",
+            "fase": "CUDA GPU Enfoque",
             "tiempoSegundos": tiempoCuda,
             "cantidadRegistros": int(len(cuda)),
-            "detalle": "Kernel personalizado con memoria compartida",
-        })
-
-    if rutaMetricasIntegracionCuda.exists():
-        integrar = pd.read_csv(rutaMetricasIntegracionCuda)
-        registros.append({
-            "fase": "Integracion CUDA",
-            "tiempoSegundos": tiempoUnicoSiExiste(integrar, "tiempoGlobalSegundos", integrar["tiempoSegundos"].sum()),
-            "cantidadRegistros": int(len(integrar)),
-            "detalle": "Conversion binario a NPY/PNG",
+            "detalle": "Filtro de enfoque 3x3 en GPU con memoria compartida",
         })
 
     resumen = pd.DataFrame(registros)
     resumen.to_csv(rutaMetricasResumen, index=False)
-    print(resumen)
+    print(resumen.to_string(index=False))
     print(f"Metricas resumen guardadas en: {rutaMetricasResumen}")
     return resumen
 

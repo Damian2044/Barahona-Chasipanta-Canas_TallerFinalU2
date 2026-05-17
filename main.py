@@ -6,7 +6,15 @@ RUTA_SRC = Path(__file__).resolve().parent / "src"
 if str(RUTA_SRC) not in sys.path:
     sys.path.insert(0, str(RUTA_SRC))
 
-ETAPAS_VALIDAS = ["todo", "descarga", "dask", "cpu", "zip-cuda", "integrar-cuda", "resumen"]
+ETAPAS_VALIDAS = [
+    "todo",
+    "descarga",
+    "dask",
+    "cpu",
+    "zip-cuda",
+    "extraer-cuda",
+    "resumen",
+]
 
 
 def construirArgumentos():
@@ -65,7 +73,7 @@ def main():
 
     from proyecto.datos.descargarDataset import descargarDatasetSiHaceFalta
     from proyecto.fases.dask import ejecutarFaseDask
-    from proyecto.fases.integrarCuda import ejecutarIntegracionCuda
+    from proyecto.fases.integrarCuda import extraerResultadosCuda
     from proyecto.fases.multiprocessingCpu import ejecutarFaseMultiprocessing
     from proyecto.metricas.crearResumenMetricas import crearMetricasResumen
     from proyecto.utilidades.archivos import crearCarpetasProyecto, crearZipCudaEntrada
@@ -83,8 +91,8 @@ def main():
     elif args.etapa == "zip-cuda":
         rutaZip = crearZipCudaEntrada()
         print(f"ZIP listo para Colab: {rutaZip}")
-    elif args.etapa == "integrar-cuda":
-        ejecutarIntegracionCuda(args.zip_resultados or None)
+    elif args.etapa == "extraer-cuda":
+        extraerResultadosCuda(args.zip_resultados or None)
         crearMetricasResumen()
     elif args.etapa == "resumen":
         crearMetricasResumen()
