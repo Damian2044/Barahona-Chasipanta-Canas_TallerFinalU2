@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 
 from proyecto.configuracion.configuracionProyecto import (
+    rutaBaseProyecto,
     rutaMetricas,
     rutaMetricasCpu,
     rutaMetricasCpuClases,
@@ -61,7 +62,8 @@ def procesarImagenCpu(fila, indiceChunk=0):
     """Lee con OpenCV, redimensiona a 512x512 y deja RAW listo para CUDA."""
     inicio = time.perf_counter()
     idImagen = int(fila["idImagen"])
-    rutaImagen = Path(fila["rutaImagen"])
+    rutaImagenCsv = Path(str(fila["rutaImagen"]))
+    rutaImagen = rutaImagenCsv if rutaImagenCsv.is_absolute() else rutaBaseProyecto / rutaImagenCsv
     clase = str(fila["clase"])
     tamanoOriginalBytes = int(fila.get("tamanoBytes", 0))
 
@@ -72,7 +74,9 @@ def procesarImagenCpu(fila, indiceChunk=0):
 
     rutaSalidaNpy = rutaClaseNpy / f"imagen_{idImagen}.npy"
     rutaSalidaRaw = rutaClaseRaw / f"imagen_{idImagen}_raw.bin"
-    rutaSalidaRawRelativa = Path("salidas") / "rawCuda" / clase / f"imagen_{idImagen}_raw.bin"
+    rutaOriginalRelativa = rutaImagen.relative_to(rutaBaseProyecto).as_posix()
+    rutaSalidaNpyRelativa = rutaSalidaNpy.relative_to(rutaBaseProyecto).as_posix()
+    rutaSalidaRawRelativa = rutaSalidaRaw.relative_to(rutaBaseProyecto).as_posix()
 
     try:
         imagenColor = cv2.imread(str(rutaImagen), cv2.IMREAD_COLOR)
@@ -101,9 +105,9 @@ def procesarImagenCpu(fila, indiceChunk=0):
         resultadoCpu = {
             "idImagen": idImagen,
             "clase": clase,
-            "rutaOriginal": str(rutaImagen),
-            "rutaNpy": str(rutaSalidaNpy),
-            "rutaRaw": str(rutaSalidaRaw),
+            "rutaOriginal": rutaOriginalRelativa,
+            "rutaNpy": rutaSalidaNpyRelativa,
+            "rutaRaw": rutaSalidaRawRelativa,
             "altoOriginal": int(altoOriginal),
             "anchoOriginal": int(anchoOriginal),
             "canalesOriginales": canalesOriginales,
@@ -130,7 +134,7 @@ def procesarImagenCpu(fila, indiceChunk=0):
         resultadoCuda = {
             "idImagen": idImagen,
             "clase": clase,
-            "rutaRaw": rutaSalidaRawRelativa.as_posix(),
+            "rutaRaw": rutaSalidaRawRelativa,
             "alto": tamanoObjetivo,
             "ancho": tamanoObjetivo,
             "tipoDato": "uint8",
@@ -145,7 +149,7 @@ def procesarImagenCpu(fila, indiceChunk=0):
         resultadoCpu = {
             "idImagen": idImagen,
             "clase": clase,
-            "rutaOriginal": str(rutaImagen),
+            "rutaOriginal": rutaOriginalRelativa,
             "rutaNpy": "",
             "rutaRaw": "",
             "altoOriginal": 0,

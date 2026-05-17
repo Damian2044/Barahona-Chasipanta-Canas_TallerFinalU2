@@ -1,108 +1,120 @@
-# Procesamiento a gran escala con arquitectura hibrida
+# Procesamiento a gran escala con arquitectura híbrida
 
-Pipeline del taller:
+## 1. Información del dataset
+
+Dataset: Corn Leaf Disease
 
 ```text
-Kaggle -> Dask -> Multiprocessing CPU + NumPy/RAW -> CUDA en Colab -> Extraccion ZIP -> Streamlit
+https://www.kaggle.com/datasets/ndisan/corn-leaf-disease
 ```
 
-Dataset:
+El dataset contiene 4000 imágenes RGB de hojas de maíz, distribuidas en 4 clases balanceadas de 1000 imágenes cada una.
 
-<https://www.kaggle.com/datasets/ndisan/corn-leaf-disease>
+Clases:
 
-El dataset contiene 4000 imagenes RGB de hojas de maiz, distribuidas en 4 clases balanceadas de 1000 imagenes cada una.
+- `Bercak Daun`: hojas con manchas foliares, asociadas a zonas grises o lesiones visibles.
+- `Daun Sehat`: hojas sanas, sin síntomas claros de enfermedad.
+- `Hawar Daun`: hojas con tizón o daño extendido, normalmente con zonas secas o quemadas.
+- `Karat Daun`: hojas con roya, caracterizada por manchas de tono óxido o rojizo.
 
-## 1. Preparar entorno
+Distribución:
+
+```text
+Bercak Daun  -> 1000 imágenes
+Daun Sehat   -> 1000 imágenes
+Hawar Daun   -> 1000 imágenes
+Karat Daun   -> 1000 imágenes
+Total        -> 4000 imágenes
+```
+
+Pipeline:
+
+```text
+Kaggle -> Dask -> Multiprocessing CPU -> RAW/NumPy -> CUDA Colab -> Streamlit
+```
+
+## 2. Estructura del proyecto
+
+```text
+Barahona-Chasipanta-Canas_TallerFinalU2/
+|-- appStreamlit.py
+|-- main.py
+|-- README.md
+|-- requirements.txt
+|-- src/
+|   |-- data/                         # Dataset descargado localmente
+|   |-- metricas/                     # CSV de métricas
+|   |-- salidas/
+|   |   |-- tablaRutas.csv
+|   |   |-- npyCpu/                   # Matrices NumPy generadas por CPU
+|   |   |-- rawCuda/                  # RAW 512x512 enviados a CUDA
+|   |   |-- cudaBin/                  # Binarios generados por CUDA
+|   |   |-- paquetes/
+|   |       |-- paqueteCudaColab.zip
+|   |       |-- resultadosCuda.zip
+|   |-- proyecto/
+|       |-- configuracion/
+|       |-- fases/
+|       |-- metricas/
+|       |-- utilidades/
+```
+
+## 3. Archivos necesarios para Streamlit
+
+Para ver solo métricas y gráficas:
+
+```text
+src/metricas/
+src/salidas/tablaRutas.csv
+```
+
+Para ver la comparación visual completa:
+
+```text
+src/data/corn-leaf-disease/   # Imagen original
+src/salidas/rawCuda/          # RAW antes de CUDA
+src/salidas/cudaBin/          # Resultado CUDA enfoque
+```
+
+Streamlit no guarda imágenes dentro de los CSV. Los CSV guardan rutas relativas y la interfaz abre los archivos físicos desde esas carpetas.
+
+## 4. Clonación y ejecución completa
+
+Instala los requerimientos:
 
 ```bash
+git clone https://github.com/Damian2044/Barahona-Chasipanta-Canas_TallerFinalU2.git
+cd Barahona-Chasipanta-Canas_TallerFinalU2
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## 2. Descargar dataset
+Puedes ejecutar el procesamiento local completo con:
+
+```bash
+python main.py
+```
+
+Ese comando descarga el dataset si falta, ejecuta Dask, procesa CPU, genera RAW/NPY, crea el paquete para Colab y genera el resumen disponible hasta ese punto.
+
+También puedes ejecutar el mismo flujo por etapas:
 
 ```bash
 python main.py --etapa descarga
+python main.py --etapa dask
+python main.py --etapa cpu
 ```
 
-El dataset queda en:
+La etapa CPU crea:
 
 ```text
-src/data/corn-leaf-disease/
-```
-
-## 3. Ejecutar procesamiento local
-
-```bash
-python main.py --no-borrar
-```
-
-Esto ejecuta:
-
-- Dask: genera `src/salidas/tablaRutas.csv` y metricas por clase.
-- Multiprocessing CPU: lee imagenes, convierte a gris, redimensiona a `512x512`, calcula metricas y genera RAW para CUDA.
-- ZIP CUDA: crea `src/salidas/paquetes/paqueteCudaColab.zip` para ejecutar el filtro de enfoque en GPU.
-
-## 4. Ejecutar CUDA en Colab
-
-Sube a Colab:
-
-```text
+src/salidas/rawCuda/
+src/salidas/npyCpu/
 src/salidas/paquetes/paqueteCudaColab.zip
 ```
 
-Abre y ejecuta:
-
-```text
-src/proyecto/fases/cuda/Barahona,Chasipanta,Cañas_Cuda.ipynb
-```
-
-El kernel CUDA aplica un filtro de enfoque con memoria compartida. Este filtro realza bordes y detalles porque aumenta el peso del pixel central y resta parte de sus vecinos inmediatos:
-
-```text
-[  0  -1   0 ]
-[ -1   5  -1 ]
-[  0  -1   0 ]
-```
-
-Descarga el archivo generado por Colab:
-
-```text
-resultadosCuda.zip
-```
-
-Guarda ese ZIP en:
-
-```text
-src/salidas/paquetes/resultadosCuda.zip
-```
-
-## 5. Extraer resultados CUDA
-
-```bash
-python main.py --etapa extraer-cuda --zip-resultados src/salidas/paquetes/resultadosCuda.zip
-python main.py --etapa resumen
-```
-
-La extraccion deja disponibles:
-
-```text
-src/salidas/cudaBin/
-src/metricas/metricasCudaColab.csv
-src/metricas/metricasExtraccionCuda.csv
-src/metricas/metricasResumen.csv
-```
-
-Streamlit lee directamente los binarios `.bin` generados por CUDA. No se requiere convertir a PNG.
-
-## 6. Abrir dashboard
-
-```bash
-streamlit run appStreamlit.py
-```
-
-## Comandos por etapa
+Comandos por etapa disponibles:
 
 ```bash
 python main.py --etapa descarga
@@ -113,50 +125,100 @@ python main.py --etapa extraer-cuda --zip-resultados src/salidas/paquetes/result
 python main.py --etapa resumen
 ```
 
-## Inicio rapido desde el repositorio
-
-Clona el repositorio y entra a la carpeta del proyecto:
-
-```bash
-git clone https://github.com/Damian2044/Barahona-Chasipanta-Canas_TallerFinalU2.git
-cd Barahona-Chasipanta-Canas_TallerFinalU2
-```
-
-Crea el entorno virtual e instala las dependencias:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-El repositorio debe subir los CSV de `src/metricas/` y los ZIP de `src/salidas/paquetes/`. No se suben las imagenes ni carpetas pesadas como `src/data/`, `src/salidas/rawCuda/`, `src/salidas/npyCpu/` o `src/salidas/cudaBin/`.
-
-Descarga y extrae el dataset en tu maquina para recuperar las imagenes originales:
-
-```bash
-python main.py --etapa descarga
-```
-
-El dataset queda extraido en:
+Sube a Colab:
 
 ```text
-src/data/corn-leaf-disease/
+src/salidas/paquetes/paqueteCudaColab.zip
 ```
 
-Si el ZIP de resultados CUDA ya viene en el repositorio, debe estar en:
+Abre el notebook:
+
+```text
+src/proyecto/fases/cuda/Barahona,Chasipanta,Cañas_Cuda.ipynb
+```
+
+Ejecuta el notebook completo. El kernel aplica el filtro de enfoque:
+
+```text
+[  0  -1   0 ]
+[ -1   5  -1 ]
+[  0  -1   0 ]
+```
+
+Descarga desde Colab:
+
+```text
+resultadosCuda.zip
+```
+
+Colócalo en:
 
 ```text
 src/salidas/paquetes/resultadosCuda.zip
 ```
 
-Extrae los binarios desde ese ZIP:
+Extrae resultados CUDA:
 
 ```bash
 python main.py --etapa extraer-cuda --zip-resultados src/salidas/paquetes/resultadosCuda.zip
 ```
 
-Prende el dashboard:
+Genera resumen final:
+
+```bash
+python main.py --etapa resumen
+```
+
+El resumen final crea `src/metricas/metricasResumen.csv`, que junta los tiempos principales de Dask, CPU y CUDA para mostrarlos en el dashboard.
+
+Abre Streamlit:
+
+```bash
+streamlit run appStreamlit.py
+```
+
+## 5. Replicar solo estadísticas
+
+Este modo usa los CSV que vienen en el repositorio. Sirve para revisar tablas, gráficas y tiempos sin descargar imágenes pesadas.
+
+```bash
+git clone https://github.com/Damian2044/Barahona-Chasipanta-Canas_TallerFinalU2.git
+cd Barahona-Chasipanta-Canas_TallerFinalU2
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run appStreamlit.py
+```
+
+La pestaña de imágenes puede mostrar archivos como no disponibles si no existen `src/data/`, `src/salidas/rawCuda/` o `src/salidas/cudaBin/`.
+
+## 6. Replicar con imágenes y Drive
+
+Descarga el dataset para recuperar las imágenes originales:
+
+```bash
+python main.py --etapa descarga
+```
+
+Descarga los resultados CUDA desde Drive:
+
+```text
+https://drive.google.com/file/d/10M0TAgktOhAy-pHdDCdmss3TbZ_PddLy/view?usp=sharing
+```
+
+Coloca la carpeta descargada en:
+
+```text
+src/salidas/cudaBin/
+```
+
+Si también descargaste `rawCuda`, colócalo en:
+
+```text
+src/salidas/rawCuda/
+```
+
+Luego abre Streamlit:
 
 ```bash
 streamlit run appStreamlit.py

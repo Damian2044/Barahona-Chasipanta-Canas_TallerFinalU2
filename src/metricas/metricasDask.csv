@@ -1,2 +1,2 @@
 fase,descripcion,cantidadImagenes,cantidadClases,tamanoTotalGb,tiempoSegundos,archivoSalida
-daskDataFrame,"Ingesta lazy con Dask DataFrame, limpieza, tipado y groupby por clase",4000,4,5.113029403612018,1.2256160999822896,C:\Barahona-Chasipanta-Canas_TallerFinalU2\src\salidas\tablaRutas.csv
+daskDataFrame,"Ingesta lazy con Dask DataFrame, limpieza, tipado y groupby por clase",4000,4,5.113029403612018,1.2777868999983184,salidas/tablaRutas.csv

@@ -9,6 +9,7 @@ from dask import delayed
 from proyecto.configuracion.configuracionProyecto import (
     extensionesPermitidas,
     limiteImagenesPrueba,
+    rutaBaseProyecto,
     rutaDatosLocal,
     rutaMetricas,
     rutaMetricasDask,
@@ -41,8 +42,9 @@ def crearMetadatosParticion(rutasTexto):
     for rutaTexto in rutasTexto:
         rutaImagen = Path(rutaTexto)
         try:
+            rutaImagenCsv = rutaImagen.relative_to(rutaBaseProyecto).as_posix()
             registros.append({
-                "rutaImagen": str(rutaImagen),
+                "rutaImagen": rutaImagenCsv,
                 "nombreArchivo": rutaImagen.name,
                 "clase": rutaImagen.parent.name,
                 "extension": rutaImagen.suffix.lower(),
@@ -51,8 +53,12 @@ def crearMetadatosParticion(rutasTexto):
                 "error": "",
             })
         except Exception as error:
+            try:
+                rutaImagenCsv = rutaImagen.relative_to(rutaBaseProyecto).as_posix()
+            except ValueError:
+                rutaImagenCsv = rutaImagen.as_posix()
             registros.append({
-                "rutaImagen": str(rutaImagen),
+                "rutaImagen": rutaImagenCsv,
                 "nombreArchivo": rutaImagen.name,
                 "clase": "",
                 "extension": rutaImagen.suffix.lower(),
@@ -143,7 +149,7 @@ def ejecutarFaseDask():
         "cantidadClases": int(tablaRutas["clase"].nunique()),
         "tamanoTotalGb": float(tablaRutas["tamanoBytes"].sum() / (1024 ** 3)),
         "tiempoSegundos": float(tiempo),
-        "archivoSalida": str(rutaTablaRutas),
+        "archivoSalida": rutaTablaRutas.relative_to(rutaBaseProyecto).as_posix(),
     }])
     metricasDask.to_csv(rutaMetricasDask, index=False)
 

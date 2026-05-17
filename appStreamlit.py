@@ -24,8 +24,6 @@ from proyecto.configuracion.configuracionProyecto import (
     rutaMetricasPrepararCuda,
     rutaMetricasResumen,
     rutaTablaRutas,
-    rutaZipCudaEntrada,
-    rutaZipCudaResultados,
     tamanoObjetivo,
 )
 
@@ -566,14 +564,12 @@ with tabCpu:
 with tabCuda:
     st.markdown('<div class="note"><b>▣ Fase CUDA.</b> Recibe los RAW 512x512 generados por CPU y ejecuta <code>aplicarEnfoque</code>, una convolución 3x3 con memoria compartida para enfoque. Cada hilo procesa un píxel usando el bloque compartido cargado en GPU.</div>', unsafe_allow_html=True)
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
     mostrarMetrica(col1, "RAW preparados", len(metricasPrepararCuda[metricasPrepararCuda["estado"] == "ok"]) if not metricasPrepararCuda.empty and "estado" in metricasPrepararCuda else len(metricasPrepararCuda))
-    mostrarMetrica(col2, "ZIP entrada", "OK" if Path(rutaZipCudaEntrada).exists() else "Pendiente")
-    mostrarMetrica(col3, "ZIP resultados", "OK" if Path(rutaZipCudaResultados).exists() else "Pendiente")
-    mostrarMetrica(col4, "Métricas GPU", len(metricasCudaColab))
+    mostrarMetrica(col2, "Métricas GPU", len(metricasCudaColab))
 
     if metricasCudaColab.empty:
-        st.info("Aún no hay metricasCudaColab.csv. Ejecuta Colab y luego `python main.py --etapa extraer-cuda --zip-resultados src/salidas/paquetes/resultadosCuda.zip`.")
+        st.info("Aún no hay métricas CUDA. Ejecuta el notebook en Colab y luego extrae `resultadosCuda.zip` para ver los resultados GPU.")
     else:
         cuda = metricasCudaColab.copy()
         colGpu1, colGpu2, colGpu3, colGpu4 = st.columns(4)

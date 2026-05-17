@@ -60,7 +60,7 @@ def crearZipCudaEntrada():
     pd.DataFrame([{
         "fase": "paqueteCuda",
         "descripcion": "Creacion del ZIP con RAW y metricas para Colab",
-        "rutaZip": str(rutaZipCudaEntrada),
+        "rutaZip": rutaZipCudaEntrada.relative_to(rutaBaseProyecto).as_posix(),
         "tamanoZipMb": rutaZipCudaEntrada.stat().st_size / (1024 ** 2) if rutaZipCudaEntrada.exists() else 0.0,
         "tiempoSegundos": float(tiempo),
     }]).to_csv(rutaMetricasPaqueteCuda, index=False)
@@ -81,7 +81,7 @@ def descomprimirZipResultados(rutaZip):
     pd.DataFrame([{
         "fase": "extraerResultadosCuda",
         "descripcion": "Extraccion del ZIP descargado desde Colab",
-        "rutaZip": str(rutaZip),
+        "rutaZip": rutaZip.relative_to(rutaBaseProyecto).as_posix() if rutaZip.is_absolute() else rutaZip.as_posix(),
         "tiempoSegundos": float(tiempo),
     }]).to_csv(rutaMetricasExtraccionCuda, index=False)
     return rutaBaseProyecto

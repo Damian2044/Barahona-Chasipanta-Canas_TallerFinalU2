@@ -1,2 +1,2 @@
 fase,descripcion,rutaZip,tiempoSegundos
-extraerResultadosCuda,Extraccion del ZIP descargado desde Colab,src\salidas\paquetes\resultadosCuda.zip,10.30119579998427
+extraerResultadosCuda,Extraccion del ZIP descargado desde Colab,src/salidas/paquetes/resultadosCuda.zip,14.544846500008134
